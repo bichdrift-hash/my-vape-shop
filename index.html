@@ -3,68 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vape Shop</title>
+    <title>VapeDealer Shop</title>
     <!-- Подключаем скрипт Телеграма -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #131314; color: #fff; padding: 15px; }
-        .product-card { background: #1e1e1f; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; }
+        body { font-family: sans-serif; background: #131314; color: #fff; padding: 15px; margin: 0; }
+        .header { text-align: center; padding: 20px 0 10px 0; }
+        .header h1 { margin: 0; font-size: 1.8em; color: #d4ff3b; }
+        .product-card { background: #1e1e1f; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; border: 1px solid #2e2e30; }
         .price { color: #d4ff3b; font-weight: bold; font-size: 1.2em; margin: 10px 0; }
-        .btn { background: #d4ff3b; color: #000; border: none; padding: 10px 20px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; }
-        .cart-section { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; box-sizing: border-box; }
+        .promo-badge { background: #ff4757; color: #fff; font-size: 0.8em; padding: 3px 8px; border-radius: 5px; display: inline-block; margin-bottom: 8px; }
+        .btn { background: #d4ff3b; color: #000; border: none; padding: 10px 20px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1em; }
+        .cart-section { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; padding-bottom: 40px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #1e1e1f; color: #fff; box-sizing: border-box; }
+        .cart-item { display: flex; justify-content: space-between; background: #1e1e1f; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 0.9em; }
+        .delete-btn { background: none; border: none; color: #ff4757; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h2>Каталог жиж</h2>
+    <div class="header">
+        <h1>VapeDealer</h1>
+        <p style="color: #8e8e93; margin: 5px 0 0 0;">Original premium flavors</p>
+    </div>
     
-    <!-- Карточка товара (пример) -->
+    <h2 style="margin-top: 20px;">Каталог Elfliq</h2>
+    
+    <!-- Карточка товара 1 -->
     <div class="product-card">
-        <h3>Green Grape Rose (30ml)</h3>
-        <p class="price">200 MDL</p>
-        <button class="btn" onclick="addToCart('Green Grape Rose', 200)">В корзину</button>
+        <span class="promo-badge">🔥 1 шт — 180 MDL | от 2 шт — 170 MDL</span>
+        <h3>Elfliq - Green Grape Rose (30ml)</h3>
+        <p class="price">180 MDL</p>
+        <button class="btn" onclick="addToCart('Elfliq - Green Grape Rose')">В корзину</button>
     </div>
 
+    <!-- Карточка товара 2 -->
     <div class="product-card">
-        <h3>Pink Lemonade Soda (30ml)</h3>
-        <p class="price">200 MDL</p>
-        <button class="btn" onclick="addToCart('Pink Lemonade Soda', 200)">В корзину</button>
+        <span class="promo-badge">🔥 1 шт — 180 MDL | от 2 шт — 170 MDL</span>
+        <h3>Elfliq - Pink Lemonade Soda (30ml)</h3>
+        <p class="price">180 MDL</p>
+        <button class="btn" onclick="addToCart('Elfliq - Pink Lemonade Soda')">В корзину</button>
     </div>
 
-    <!-- Корзина и оформление -->
+    <!-- Карточка товара 3 -->
+    <div class="product-card">
+        <span class="promo-badge">🔥 1 шт — 180 MDL | от 2 шт — 170 MDL</span>
+        <h3>Elfliq - Blueberry Raspberry Pomegranate (30ml)</h3>
+        <p class="price">180 MDL</p>
+        <button class="btn" onclick="addToCart('Elfliq - Blueberry Raspberry Pomegranate')">В корзину</button>
+    </div>
+
+    <!-- Раздел Корзины -->
     <div class="cart-section">
-        <h3>Оформление заказа</h3>
-        <p id="cart-status">Корзина пуста</p>
+        <h3 style="border-bottom: 1px solid #333; padding-bottom: 10px;">🛒 Твой заказ</h3>
         
-        <label>Контакт для связи:</label>
+        <div id="cart-list">
+            <!-- Сюда будут добавляться товары динамически -->
+        </div>
+        
+        <p id="cart-total" style="font-weight: bold; font-size: 1.2em; text-align: right; color: #d4ff3b; margin: 15px 0;">Итого: 0 MDL</p>
+        
+        <label>📞 Контакт для связи (Телефон или Юзернейм):</label>
         <input type="text" id="contact" placeholder="+373 xx xx xx или @username">
         
-        <label>Способ получения:</label>
-        <select id="delivery">
+        <label>🚚 Способ получения:</label>
+        <select id="delivery" onchange="calculateTotal()">
             <option value="Самовывоз (Рышкановка)">Самовывоз (Рышкановка) — Бесплатно</option>
-            <option value="Доставка по Кишиневу">Доставка по Кишиневу — 50 MDL</option>
+            <option value="Доставка по Кишиневу">Доставка по Кишиневу — +50 MDL</option>
         </select>
         
-        <button class="btn" style="background: #9eff56; margin-top: 15px;" onclick="sendOrder()">Подтвердить заказ</button>
+        <button class="btn" style="background: #9eff56; margin-top: 15px; padding: 15px;" onclick="sendOrder()">Оформить заказ →</button>
     </div>
 
     <script>
-        // Инициализируем Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширяем на весь экран
+        tg.expand();
 
         let cart = [];
-        let total = 0;
 
-        function addToCart(name, price) {
-            cart.push({ name: name, price: price });
-            total += price;
-            document.getElementById('cart-status').innerText = `Товаров в корзине: ${cart.length} на сумму ${total} MDL`;
+        // Добавление в корзину
+        function addToCart(flavorName) {
+            cart.push(flavorName);
+            renderCart();
         }
 
+        // Удаление из корзины
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        // Расчет стоимости с учетом твоей скидки
+        function calculateTotal() {
+            const count = cart.length;
+            // Если банок 2 или больше, цена по 170. Если одна - 180.
+            const pricePerUnit = count >= 2 ? 170 : 180;
+            
+            let itemsTotal = count * pricePerUnit;
+            
+            // Проверяем доставку (+50 MDL за Кишинев)
+            const deliveryMethod = document.getElementById('delivery').value;
+            if (deliveryMethod === "Доставка по Кишиневу") {
+                itemsTotal += 50;
+            }
+            
+            return {
+                itemsTotal: itemsTotal,
+                currentUnitPrice: pricePerUnit
+            };
+        }
+
+        // Обновление внешнего вида корзины на экране
+        function renderCart() {
+            const listContainer = document.getElementById('cart-list');
+            listContainer.innerHTML = '';
+            
+            if (cart.length === 0) {
+                listContainer.innerHTML = '<p style="color: #8e8e93; font-style: italic;">Корзина пуста</p>';
+                document.getElementById('cart-total').innerText = 'Итого: 0 MDL';
+                return;
+            }
+
+            const pricing = calculateTotal();
+
+            cart.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.innerHTML = `
+                    <span>${item} (1 шт) — <b>${pricing.currentUnitPrice} MDL</b></span>
+                    <button class="delete-btn" onclick="removeFromCart(${index})">❌</button>
+                `;
+                listContainer.appendChild(itemDiv);
+            });
+
+            document.getElementById('cart-total').innerText = `Итого: ${pricing.itemsTotal} MDL`;
+        }
+
+        // Отправка заказа в бота
         function sendOrder() {
-            const contactInput = document.getElementById('contact').value;
+            const contactInput = document.getElementById('contact').value.trim();
             const deliveryMethod = document.getElementById('delivery').value;
 
             if (cart.length === 0) {
@@ -72,20 +149,27 @@
                 return;
             }
             if (!contactInput) {
-                alert('Укажите контакт для связи!');
+                alert('Пожалуйста, укажите контакт для связи, чтобы менеджер мог написать вам!');
                 return;
             }
 
-            // Формируем объект с данными
-            const data = {
-                items: cart,
-                total_price: total,
+            const pricing = calculateTotal();
+            
+            // Создаем красивый список товаров для отправки
+            const itemsList = cart.map(item => ({
+                name: item,
+                price: pricing.currentUnitPrice
+            }));
+
+            const orderData = {
+                items: itemsList,
+                total_price: pricing.itemsTotal,
                 delivery: deliveryMethod,
                 contact: contactInput
             };
 
-            // Отправляем данные боту и закрываем окно
-            tg.sendData(JSON.stringify(data));
+            // Отправляем json в питон-бот
+            tg.sendData(JSON.stringify(orderData));
             tg.close();
         }
     </script>
