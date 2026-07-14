@@ -8,11 +8,62 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; background: #131314; color: #fff; padding: 15px; margin: 0; }
-        .header { text-align: center; padding: 20px 0 10px 0; }
-        .header h1 { margin: 0; font-size: 1.8em; color: #d4ff3b; }
         
-        /* Сетка для карточек товаров */
-        .catalog { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        /* Шапка бренда */
+        .header { text-align: center; padding: 15px 0 10px 0; }
+        .header h1 { margin: 0; font-size: 1.8em; color: #d4ff3b; }
+        .header p { color: #8e8e93; margin: 5px 0 15px 0; font-size: 0.9em; }
+
+        /* Верхняя панель с кнопками (Канал, Менеджер, Корзина) */
+        .top-nav { display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 8px; margin-bottom: 20px; }
+        .nav-btn { 
+            background: #222224; 
+            color: #fff; 
+            border: 1px solid #333; 
+            padding: 10px 5px; 
+            border-radius: 10px; 
+            font-size: 0.85em; 
+            font-weight: bold; 
+            text-align: center; 
+            text-decoration: none; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .nav-btn.highlight { background: #d4ff3b; color: #000; border: none; }
+
+        /* Поиск */
+        .search-container { margin-bottom: 15px; }
+        .search-input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border-radius: 10px; 
+            border: 1px solid #2e2e30; 
+            background: #1e1e1f; 
+            color: #fff; 
+            box-sizing: border-box; 
+            font-size: 0.95em; 
+        }
+
+        /* Фильтры наличия */
+        .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .filter-btn { 
+            background: #1e1e1f; 
+            color: #8e8e93; 
+            border: 1px solid #2e2e30; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 0.85em; 
+            cursor: pointer; 
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        .filter-btn.active { background: #d4ff3b; color: #000; border: none; }
+
+        /* Сетка каталога */
+        .catalog { display: grid; grid-template-columns: 1fr; gap: 15px; }
         
         .product-card { 
             background: #1e1e1f; 
@@ -21,12 +72,15 @@
             border: 1px solid #2e2e30; 
             display: flex; 
             flex-direction: column;
-            text-align: left;
+            transition: 0.2s;
         }
         
+        /* Если товара нет в наличии, карточка слегка тускнеет */
+        .product-card.out-of-stock { opacity: 0.5; }
+
         .product-img { 
             width: 100%; 
-            height: 220px; 
+            height: 200px; 
             object-fit: cover; 
             background: #282829;
         }
@@ -44,14 +98,23 @@
             font-weight: bold;
         }
         
-        .product-title { margin: 0 0 5px 0; font-size: 1.2em; color: #fff; }
-        .product-desc { margin: 0 0 15px 0; font-size: 0.9em; color: #8e8e93; line-height: 1.4; }
+        .product-title { margin: 0 0 5px 0; font-size: 1.15em; color: #fff; }
+        .product-desc { margin: 0 0 15px 0; font-size: 0.85em; color: #8e8e93; line-height: 1.4; }
         
         .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .price { color: #d4ff3b; font-weight: bold; font-size: 1.3em; margin: 0; }
+        .price { color: #d4ff3b; font-weight: bold; font-size: 1.25em; margin: 0; }
         
-        .btn { background: #d4ff3b; color: #000; border: none; padding: 10px 15px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 0.95em; transition: 0.2s; }
-        .btn:active { transform: scale(0.97); }
+        .btn { 
+            background: #d4ff3b; 
+            color: #000; 
+            border: none; 
+            padding: 10px 15px; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+        }
+        .btn.disabled { background: #333; color: #8e8e93; cursor: not-allowed; }
         
         /* Оформление корзины */
         .cart-section { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; padding-bottom: 40px; }
@@ -64,74 +127,38 @@
 
     <div class="header">
         <h1>VapeDealer</h1>
-        <p style="color: #8e8e93; margin: 5px 0 0 0;">Premium Liquids Shop</p>
+        <p>Premium Liquids Shop</p>
+    </div>
+
+    <!-- ТРИ КНОПКИ (Канал, Менеджер, Корзина) -->
+    <div class="top-nav">
+        <!-- Укажи ссылку на свой телеграм-канал -->
+        <a href="https://t.me/vape_dealermd" target="_blank" class="nav-btn">📢 Канал</a>
+        <!-- Укажи ссылку на свой аккаунт менеджера -->
+        <a href="https://t.me/ebywz" target="_blank" class="nav-btn highlight">💬 Менеджер</a>
+        <!-- Кнопка плавно скроллит вниз к оформлению заказа -->
+        <div onclick="scrollToCart()" class="nav-btn">🛒 Корзина (<span id="nav-cart-count">0</span>)</div>
+    </div>
+
+    <!-- ПОИСК ВКУСОВ -->
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="🔍 Поиск вкуса..." oninput="filterProducts()">
+    </div>
+
+    <!-- ФИЛЬТРЫ НАЛИЧИЯ -->
+    <div class="filters">
+        <button class="filter-btn active" id="btn-all" onclick="setFilter('all')">Все</button>
+        <button class="filter-btn" id="btn-instock" onclick="setFilter('instock')">В наличии</button>
+        <button class="filter-btn" id="btn-outofstock" onclick="setFilter('outofstock')">Нет в наличии</button>
     </div>
     
     <h2>Каталог Elfliq</h2>
     
-    <div class="catalog">
-        
-        <!-- Товар 1 -->
-        <div class="product-card">
-            <!-- Сюда в src подставим имя файла картинки, когда загрузим её на GitHub -->
-            <img class="product-img" src="green_grape.jpg" alt="Green Grape Rose">
-            <div class="product-info">
-                <span class="promo-badge">🔥 Акция: от 2-х шт по 170 MDL</span>
-                <h3 class="product-title">Green Grape Rose (30ml)</h3>
-                <p class="product-desc">Невероятный микс сочного зеленого винограда с тонкими, изысканными нотками свежих лепестков розы. Сладкий, освежающий и по-настоящему премиальный вкус.</p>
-                <div class="price-row">
-                    <p class="price">180 MDL</p>
-                    <button class="btn" onclick="addToCart('Elfliq - Green Grape Rose')">В корзину</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Товар 2 -->
-        <div class="product-card">
-            <img class="product-img" src="pink_lemonade.jpg" alt="Pink Lemonade Soda">
-            <div class="product-info">
-                <span class="promo-badge">🔥 Акция: от 2-х шт по 170 MDL</span>
-                <h3 class="product-title">Pink Lemonade Soda (30ml)</h3>
-                <p class="product-desc">Классический розовый лимонад с кубиками льда. Идеальный баланс спелой садовой малины и легкой лимонной кислинки с шипучими пузырьками содовой.</p>
-                <div class="price-row">
-                    <p class="price">180 MDL</p>
-                    <button class="btn" onclick="addToCart('Elfliq - Pink Lemonade Soda')">В корзину</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Товар 3 -->
-        <div class="product-card">
-            <img class="product-img" src="blueberry_pomegranate.jpg" alt="Blueberry Raspberry Pomegranate">
-            <div class="product-info">
-                <span class="promo-badge">🔥 Акция: от 2-х шт по 170 MDL</span>
-                <h3 class="product-title">Blueberry Raspberry Pomegranate (30ml)</h3>
-                <p class="product-desc">Богатое лесное трио: спелая черника, сладкая малина и терпкий, благородный сок спелого граната. Яркий ягодный взрыв на вдохе!</p>
-                <div class="price-row">
-                    <p class="price">180 MDL</p>
-                    <button class="btn" onclick="addToCart('Elfliq - Blueberry Raspberry Pomegranate')">В корзину</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Товар 4 -->
-        <div class="product-card">
-            <img class="product-img" src="blue_razz.jpg" alt="Blue Razz Lemonade">
-            <div class="product-info">
-                <span class="promo-badge">🔥 Акция: от 2-х шт по 170 MDL</span>
-                <h3 class="product-title">Blue Razz Lemonade (30ml)</h3>
-                <p class="product-desc">Знаменитый вкус синей малины в сочетании с бодрящим, прохладным домашним лимонадом. Один из самых популярных вкусов линейки.</p>
-                <div class="price-row">
-                    <p class="price">180 MDL</p>
-                    <button class="btn" onclick="addToCart('Elfliq - Blue Razz Lemonade')">В корзину</button>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <!-- Сюда JavaScript будет сам выводить карточки товаров -->
+    <div class="catalog" id="catalog-container"></div>
 
     <!-- Раздел Корзины -->
-    <div class="cart-section">
+    <div id="cart-anchor" class="cart-section">
         <h3 style="border-bottom: 1px solid #333; padding-bottom: 10px;">🛒 Оформление заказа</h3>
         
         <div id="cart-list"></div>
@@ -154,18 +181,127 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let cart = [];
+        // --- БАЗА ДАННЫХ ТВОИХ ВКУСОВ ---
+        // Тут ты можешь легко менять цены, добавлять новые вкусы, менять описание и статус наличия (true - есть, false - нет)
+        const products = [
+            {
+                id: 1,
+                name: "Elfliq - Green Grape Rose (30ml)",
+                desc: "Невероятный микс сочного зеленого винограда с тонкими, изысканными нотками свежих лепестков розы.",
+                img: "green_grape.jpg",
+                inStock: true
+            },
+            {
+                id: 2,
+                name: "Elfliq - Pink Lemonade Soda (30ml)",
+                desc: "Классический розовый лимонад с кубиками льда. Идеальный баланс спелой садовой малины и легкой лимонной кислинки.",
+                img: "pink_lemonade.jpg",
+                inStock: true
+            },
+            {
+                id: 3,
+                name: "Elfliq - Blueberry Raspberry Pomegranate (30ml)",
+                desc: "Богатое лесное трио: спелая черника, сладкая малина и терпкий, благородный сок спелого граната.",
+                img: "blueberry_pomegranate.jpg",
+                inStock: true
+            },
+            {
+                id: 4,
+                name: "Elfliq - Blue Razz Lemonade (30ml)",
+                desc: "Знаменитый вкус синей малины в сочетании с бодрящим, прохладным домашним лимонадом.",
+                img: "blue_razz.jpg",
+                inStock: false // Пример товара, которого нет в наличии
+            }
+        ];
 
+        let cart = [];
+        let currentFilter = 'all'; // Текущий фильтр наличия ('all', 'instock', 'outofstock')
+
+        // Отрисовка товаров на экране
+        function renderCatalog() {
+            const container = document.getElementById('catalog-container');
+            container.innerHTML = '';
+            
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+
+            products.forEach(product => {
+                // Фильтр по поиску
+                const matchesSearch = product.name.toLowerCase().includes(searchQuery);
+                
+                // Фильтр по наличию
+                let matchesFilter = false;
+                if (currentFilter === 'all') matchesFilter = true;
+                else if (currentFilter === 'instock' && product.inStock) matchesFilter = true;
+                else if (currentFilter === 'outofstock' && !product.inStock) matchesFilter = true;
+
+                if (matchesSearch && matchesFilter) {
+                    const card = document.createElement('div');
+                    card.className = `product-card ${product.inStock ? '' : 'out-of-stock'}`;
+                    
+                    const badge = product.inStock 
+                        ? `<span class="promo-badge">🔥 Акция: от 2-х шт по 170 MDL</span>` 
+                        : `<span class="promo-badge" style="background: #555;">Нет в наличии</span>`;
+                    
+                    const buttonHtml = product.inStock 
+                        ? `<button class="btn" onclick="addToCart('${product.name}')">В корзину</button>` 
+                        : `<button class="btn disabled" disabled>Ожидается</button>`;
+
+                    card.innerHTML = `
+                        <img class="product-img" src="${product.img}" alt="${product.name}">
+                        <div class="product-info">
+                            ${badge}
+                            <h3 class="product-title">${product.name}</h3>
+                            <p class="product-desc">${product.desc}</p>
+                            <div class="price-row">
+                                <p class="price">180 MDL</p>
+                                ${buttonHtml}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            });
+        }
+
+        // Логика фильтров по кнопкам "Все" / "В наличии" / "Нет в наличии"
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            
+            // Смена активного класса у кнопок
+            document.getElementById('btn-all').classList.remove('active');
+            document.getElementById('btn-instock').classList.remove('active');
+            document.getElementById('btn-outofstock').classList.remove('active');
+            
+            document.getElementById(`btn-${filterType}`).classList.add('active');
+            
+            renderCatalog();
+        }
+
+        // Логика живого поиска
+        function filterProducts() {
+            renderCatalog();
+        }
+
+        // Скролл к корзине по клику на кнопку
+        function scrollToCart() {
+            document.getElementById('cart-anchor').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Добавление в корзину
         function addToCart(flavorName) {
             cart.push(flavorName);
+            document.getElementById('nav-cart-count').innerText = cart.length;
             renderCart();
         }
 
+        // Удаление из корзины
         function removeFromCart(index) {
             cart.splice(index, 1);
+            document.getElementById('nav-cart-count').innerText = cart.length;
             renderCart();
         }
 
+        // Расчет стоимости
         function calculateTotal() {
             const count = cart.length;
             const pricePerUnit = count >= 2 ? 170 : 180;
@@ -182,6 +318,7 @@
             };
         }
 
+        // Отрисовка корзины
         function renderCart() {
             const listContainer = document.getElementById('cart-list');
             listContainer.innerHTML = '';
@@ -207,6 +344,7 @@
             document.getElementById('cart-total').innerText = `Итого: ${pricing.itemsTotal} MDL`;
         }
 
+        // Отправка заказа в бот
         function sendOrder() {
             const contactInput = document.getElementById('contact').value.trim();
             const deliveryMethod = document.getElementById('delivery').value;
@@ -236,6 +374,9 @@
             tg.sendData(JSON.stringify(orderData));
             tg.close();
         }
+
+        // Инициализация при первой загрузке страницы
+        renderCatalog();
     </script>
 </body>
 </html>
