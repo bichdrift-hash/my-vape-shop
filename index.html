@@ -67,6 +67,7 @@
         
         .product-card { 
             background: #1e1e1f; 
+            border-radius: 166px; 
             border-radius: 16px; 
             overflow: hidden; 
             border: 1px solid #2e2e30; 
@@ -129,13 +130,10 @@
         <p>Premium Liquids Shop</p>
     </div>
 
-    <!-- ТРИ КНОПКИ (Канал, Менеджер, Корзина) -->
+    <!-- ТРИ КНОПКИ -->
     <div class="top-nav">
-        <!-- Твой канал по ссылке-приглашению -->
         <a href="https://t.me/+1-6I_77qvvtlZmM6" target="_blank" class="nav-btn">📢 Канал</a>
-        <!-- Твой менеджер через юзернейм -->
         <a href="https://t.me/vape_dealermd" target="_blank" class="nav-btn highlight">💬 Менеджер</a>
-        <!-- Кнопка скролла к корзине -->
         <div onclick="scrollToCart()" class="nav-btn">🛒 Корзина (<span id="nav-cart-count">0</span>)</div>
     </div>
 
@@ -167,7 +165,6 @@
         <input type="text" id="contact" placeholder="+373 xx xx xx или @username">
         
         <label>🚚 Способ получения:</label>
-        <!-- Обновили варианты получения -->
         <select id="delivery" onchange="calculateTotal()">
             <option value="Самовывоз (Бельцы)">Самовывоз (Бельцы) — Бесплатно</option>
             <option value="Доставка">Доставка — +50 MDL</option>
@@ -180,34 +177,111 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ТВОЯ БАЗА ТОВАРОВ
+        // ТВОЯ ОБНОВЛЕННАЯ БАЗА ИЗ 15 ВКУСОВ
         const products = [
             {
                 id: 1,
-                name: "Elfliq - Green Grape Rose (30ml)",
-                desc: "Невероятный микс сочного зеленого винограда с тонкими нотками свежих лепестков розы.",
-                img: "green_grape.jpg",
+                name: "Elfliq - Apple Peach 🍎🍑",
+                desc: "Яблоко Персик. Идеальный баланс спелого хрустящего яблока и нежного сладкого персика.",
+                img: "apple_peach.jpg",
                 inStock: true
             },
             {
                 id: 2,
-                name: "Elfliq - Pink Lemonade Soda (30ml)",
-                desc: "Классический розовый лимонад с кубиками льда, спелой малиной и легкой лимонной кислинкой.",
-                img: "pink_lemonade.jpg",
+                name: "Elfliq - Blackberry Lemon 🍇🍋",
+                desc: "Ежевика Лимон. Свежая лесная ежевика с приятной цитрусовой кислинкой лимона.",
+                img: "blackberry_lemon.jpg",
                 inStock: true
             },
             {
                 id: 3,
-                name: "Elfliq - Blueberry Raspberry Pomegranate (30ml)",
-                desc: "Богатое лесное трио: спелая черника, сладкая малина и терпкий сок спелого граната.",
-                img: "blueberry_pomegranate.jpg",
+                name: "Elfliq - Blue Razz Ice 🫐❄️",
+                desc: "Голубая Малина Лед. Ледяной микс из спелой синей малины с морозной свежестью.",
+                img: "blue_razz_ice.jpg",
                 inStock: true
             },
             {
                 id: 4,
-                name: "Elfliq - Blue Razz Lemonade (30ml)",
-                desc: "Знаменитый вкус синей малины в сочетании с бодрящим, прохладным домашним лимонадом.",
-                img: "blue_razz.jpg",
+                name: "Elfliq - Blueberry Rose Mint 🫐🌹🌱",
+                desc: "Черника Роза Мята. Необычный цветочный аромат спелой черники, лепестков роз и прохладной мяты.",
+                img: "blueberry_rose_mint.jpg",
+                inStock: true
+            },
+            {
+                id: 5,
+                name: "Elfliq - Sour Blueberry Raspberry 🫐💥",
+                desc: "Черника Кислая Малина. Яркий ягодный дуэт черники и малины с приятным кислым послевкусием.",
+                img: "sour_blueberry_raspberry.jpg",
+                inStock: true
+            },
+            {
+                id: 6,
+                name: "Elfliq - Cherry Cola 🍒🥤",
+                desc: "Вишневая Кола. Знаменитый шипучий вкус сладкой колы со спелой вишней.",
+                img: "cherry_cola.jpg",
+                inStock: true
+            },
+            {
+                id: 7,
+                name: "Elfliq - Cherry Lemon Peach 🍒🍋🍑",
+                desc: "Вишня Лимон Персик. Сложное и безумно сочное трио спелой вишни, кислого лимона и сладкого персика.",
+                img: "cherry_lemon_peach.jpg",
+                inStock: true
+            },
+            {
+                id: 8,
+                name: "Elfliq - Elf Jack 🧃",
+                desc: "Эльф Джек. Фирменный экзотический вкус, который удивит своими фруктовыми оттенками.",
+                img: "elf_jack.jpg",
+                inStock: true
+            },
+            {
+                id: 9,
+                name: "Elfliq - Elfbull Ice ⚡️❄️",
+                desc: "Энергетик Лед. Бодрящий вкус классического ледяного энергетического напитка.",
+                img: "elfbull_ice.jpg",
+                inStock: true
+            },
+            {
+                id: 10,
+                name: "Elfliq - Green Grape Rose 🍇🌹",
+                desc: "Зеленый Виноград Роза. Сочный спелый зеленый виноград с легкими цветочными нотками чайной розы.",
+                img: "green_grape_rose.jpg",
+                inStock: true
+            },
+            {
+                id: 11,
+                name: "Elfliq - Jasmine Raspberry 🌸🍇",
+                desc: "Жасмин Малина. Свежесть жасминового чая со спелыми ягодами ароматной малины.",
+                img: "jasmine_raspberry.jpg",
+                inStock: true
+            },
+            {
+                id: 12,
+                name: "Elfliq - Kiwi Passion Fruit Guava 🥝🍹",
+                desc: "Киви Маракуйя Гуава. Настоящий тропический коктейль из кисловатого киви, маракуйи и розовой гуавы.",
+                img: "kiwi_guava.jpg",
+                inStock: true
+            },
+            {
+                id: 13,
+                name: "Elfliq - Pina Colada 🥥🍍",
+                desc: "Пина Колада. Нежный кокосовый крем в сочетании со спелым сладким ананасом.",
+                img: "pina_colada.jpg",
+                inStock: true
+            },
+            {
+                id: 14,
+                name: "Elfliq - Pink Lemonade 🍋",
+                desc: "Розовый Лимонад. Сладкий и освежающий лимонад из красных лесных ягод и спелых лимонов.",
+                img: "pink_lemonade.jpg",
+                inStock: true
+            },
+            {
+                id: 15,
+                name: "Elfliq - Strawberry Cherry Lemon 🍓🍒🍋",
+                desc: "Клубника Вишня Лимон. Вкусное сочетание садовой клубники, спелой вишни и лимонного сока.",
+                img: "strawberry_cherry_lemon.jpg",
                 inStock: true
             }
         ];
@@ -292,7 +366,6 @@
             let itemsTotal = count * pricePerUnit;
             
             const deliveryMethod = document.getElementById('delivery').value;
-            // Проверяем, выбрана ли платная доставка
             if (deliveryMethod === "Доставка") {
                 itemsTotal += 50;
             }
