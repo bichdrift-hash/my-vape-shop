@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vape Shop</title>
+    <!-- Подключаем скрипт Телеграма -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #131314; color: #fff; padding: 15px; }
+        .product-card { background: #1e1e1f; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; }
+        .price { color: #d4ff3b; font-weight: bold; font-size: 1.2em; margin: 10px 0; }
+        .btn { background: #d4ff3b; color: #000; border: none; padding: 10px 20px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; }
+        .cart-section { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <h2>Каталог жиж</h2>
+    
+    <!-- Карточка товара (пример) -->
+    <div class="product-card">
+        <h3>Green Grape Rose (30ml)</h3>
+        <p class="price">200 MDL</p>
+        <button class="btn" onclick="addToCart('Green Grape Rose', 200)">В корзину</button>
+    </div>
+
+    <div class="product-card">
+        <h3>Pink Lemonade Soda (30ml)</h3>
+        <p class="price">200 MDL</p>
+        <button class="btn" onclick="addToCart('Pink Lemonade Soda', 200)">В корзину</button>
+    </div>
+
+    <!-- Корзина и оформление -->
+    <div class="cart-section">
+        <h3>Оформление заказа</h3>
+        <p id="cart-status">Корзина пуста</p>
+        
+        <label>Контакт для связи:</label>
+        <input type="text" id="contact" placeholder="+373 xx xx xx или @username">
+        
+        <label>Способ получения:</label>
+        <select id="delivery">
+            <option value="Самовывоз (Рышкановка)">Самовывоз (Рышкановка) — Бесплатно</option>
+            <option value="Доставка по Кишиневу">Доставка по Кишиневу — 50 MDL</option>
+        </select>
+        
+        <button class="btn" style="background: #9eff56; margin-top: 15px;" onclick="sendOrder()">Подтвердить заказ</button>
+    </div>
+
+    <script>
+        // Инициализируем Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Расширяем на весь экран
+
+        let cart = [];
+        let total = 0;
+
+        function addToCart(name, price) {
+            cart.push({ name: name, price: price });
+            total += price;
+            document.getElementById('cart-status').innerText = `Товаров в корзине: ${cart.length} на сумму ${total} MDL`;
+        }
+
+        function sendOrder() {
+            const contactInput = document.getElementById('contact').value;
+            const deliveryMethod = document.getElementById('delivery').value;
+
+            if (cart.length === 0) {
+                alert('Сначала добавьте товар в корзину!');
+                return;
+            }
+            if (!contactInput) {
+                alert('Укажите контакт для связи!');
+                return;
+            }
+
+            // Формируем объект с данными
+            const data = {
+                items: cart,
+                total_price: total,
+                delivery: deliveryMethod,
+                contact: contactInput
+            };
+
+            // Отправляем данные боту и закрываем окно
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
