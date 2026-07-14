@@ -167,9 +167,10 @@
         <input type="text" id="contact" placeholder="+373 xx xx xx или @username">
         
         <label>🚚 Способ получения:</label>
+        <!-- Обновили варианты получения -->
         <select id="delivery" onchange="calculateTotal()">
-            <option value="Самовывоз (Рышкановка)">Самовывоз (Рышкановка) — Бесплатно</option>
-            <option value="Доставка по Кишиневу">Доставка по Кишиневу — +50 MDL</option>
+            <option value="Самовывоз (Бельцы)">Самовывоз (Бельцы) — Бесплатно</option>
+            <option value="Доставка">Доставка — +50 MDL</option>
         </select>
         
         <button class="btn" style="background: #9eff56; margin-top: 15px; padding: 15px; width: 100%; font-size: 1.1em;" onclick="sendOrder()">Подтвердить заказ →</button>
@@ -291,7 +292,8 @@
             let itemsTotal = count * pricePerUnit;
             
             const deliveryMethod = document.getElementById('delivery').value;
-            if (deliveryMethod === "Доставка по Кишиневу") {
+            // Проверяем, выбрана ли платная доставка
+            if (deliveryMethod === "Доставка") {
                 itemsTotal += 50;
             }
             
