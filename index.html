@@ -7,156 +7,77 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; background: #131314; color: #fff; padding: 15px; margin: 0; }
-        .header { text-align: center; padding: 15px 0 10px 0; }
-        .header h1 { margin: 0; font-size: 1.8em; color: #d4ff3b; }
-        .header p { color: #8e8e93; margin: 5px 0 15px 0; font-size: 0.9em; }
-        
-        .top-nav { display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 8px; margin-bottom: 20px; }
-        .nav-btn { background: #222224; color: #fff; border: 1px solid #333; padding: 10px 5px; border-radius: 10px; font-size: 0.85em; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .nav-btn.highlight { background: #d4ff3b; color: #000; border: none; }
-
-        .search-container { margin-bottom: 15px; }
-        .search-input { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #2e2e30; background: #1e1e1f; color: #fff; box-sizing: border-box; font-size: 0.95em; }
-
-        .filters { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .filter-btn { background: #1e1e1f; color: #8e8e93; border: 1px solid #2e2e30; padding: 8px 16px; border-radius: 20px; font-size: 0.85em; cursor: pointer; white-space: nowrap; font-weight: bold; }
-        .filter-btn.active { background: #d4ff3b; color: #000; border: none; }
-
-        /* ИЗМЕНЕНИЯ: СЕТКА 2 КОЛОНКИ */
-        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .product-card { background: #1e1e1f; border-radius: 16px; overflow: hidden; border: 1px solid #2e2e30; display: flex; flex-direction: column; transition: 0.2s; }
-        .product-card.out-of-stock { opacity: 0.5; }
-        .product-img { width: 100%; height: 120px; object-fit: cover; background: #282829; }
-        .product-info { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; }
-        .promo-badge { background: #ff4757; color: #fff; font-size: 0.65em; padding: 3px 6px; border-radius: 6px; align-self: flex-start; margin-bottom: 5px; font-weight: bold; }
-        .product-title { margin: 0 0 5px 0; font-size: 0.9em; color: #fff; line-height: 1.2; height: 2.4em; overflow: hidden; }
-        .product-desc { display: none; } /* Скрыто, чтобы влезло в 2 колонки */
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .price { color: #d4ff3b; font-weight: bold; font-size: 1em; margin: 0; }
-        .btn { background: #d4ff3b; color: #000; border: none; padding: 8px 10px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 0.85em; }
-        .btn.disabled { background: #333; color: #8e8e93; cursor: not-allowed; }
-
-        .cart-section { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; padding-bottom: 40px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #1e1e1f; color: #fff; box-sizing: border-box; }
-        .cart-item { display: flex; justify-content: space-between; background: #1e1e1f; padding: 12px; border-radius: 10px; margin-bottom: 8px; font-size: 0.9em; border: 1px solid #2e2e30; }
-        .delete-btn { background: none; border: none; color: #ff4757; cursor: pointer; font-weight: bold; font-size: 1.1em; }
+        .header { text-align: center; padding: 15px 0; }
+        .header h1 { color: #d4ff3b; font-size: 1.6em; margin: 0; }
+        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .product-card { background: #1e1e1f; border-radius: 12px; padding: 10px; border: 1px solid #2e2e30; }
+        .price { color: #d4ff3b; font-weight: bold; margin: 5px 0; }
+        .btn { background: #d4ff3b; color: #000; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; border: none; }
+        .cart-section { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <h1>VapeDealer</h1>
-        <p>Premium Liquids Shop</p>
-    </div>
-
-    <div class="top-nav">
-        <a href="https://t.me/+1-6I_77qvvtlZmM6" target="_blank" class="nav-btn">📢 Канал</a>
-        <a href="https://t.me/vape_dealermd" target="_blank" class="nav-btn highlight">💬 Менеджер</a>
-        <div onclick="scrollToCart()" class="nav-btn">🛒 (<span id="nav-cart-count">0</span>)</div>
-    </div>
-
-    <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="🔍 Поиск..." oninput="renderCatalog()">
-    </div>
-
-    <div class="filters">
-        <button class="filter-btn active" id="btn-all" onclick="setFilter('all')">Все</button>
-        <button class="filter-btn" id="btn-instock" onclick="setFilter('instock')">В наличии</button>
-        <button class="filter-btn" id="btn-outofstock" onclick="setFilter('outofstock')">Нет в наличии</button>
-    </div>
-    
+    <div class="header"><h1>VapeDealer</h1></div>
     <div class="catalog" id="catalog-container"></div>
-
-    <div id="cart-anchor" class="cart-section">
-        <h3>🛒 Оформление заказа</h3>
+    <div class="cart-section">
+        <h3>🛒 Корзина</h3>
         <div id="cart-list"></div>
-        <p id="cart-total" style="font-weight: bold; font-size: 1.2em; text-align: right; color: #d4ff3b; margin: 15px 0;">Итого: 0 MDL</p>
-        <input type="text" id="contact" placeholder="Телефон или @username">
+        <p id="cart-total">Итого: 0 MDL</p>
+        <input type="text" id="contact" placeholder="Введите ваш контакт (Лсдм или номер)">
         <select id="delivery" onchange="renderCart()">
             <option value="Самовывоз (Бельцы)">Самовывоз (Бельцы)</option>
-            <option value="Доставка">Доставка (+50 MDL)</option>
+            <option value="Доставка (+50 лей)">Доставка (+50 лей)</option>
         </select>
-        <button class="btn" style="background: #9eff56; width: 100%; padding: 15px; font-size: 1.1em;" onclick="sendOrder()">Подтвердить заказ</button>
+        <button class="btn" onclick="sendOrder()">Оформить заказ</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-
         const products = [
-            { id: 1, name: "Elfliq - Apple Peach 🍎", inStock: true },
-            { id: 2, name: "Elfliq - Blackberry Lemon 🍇", inStock: true },
-            { id: 3, name: "Elfliq - Blue Razz Ice 🫐", inStock: true },
-            { id: 4, name: "Elfliq - Blueberry Rose Mint 🌹", inStock: true },
-            { id: 5, name: "Elfliq - Sour Blueberry Raspberry 💥", inStock: true },
-            { id: 6, name: "Elfliq - Cherry Cola 🍒", inStock: true },
-            { id: 7, name: "Elfliq - Cherry Lemon Peach 🍑", inStock: true },
-            { id: 8, name: "Elfliq - Elf Jack 🧃", inStock: true },
-            { id: 9, name: "Elfliq - Elfbull Ice ⚡", inStock: true },
-            { id: 10, name: "Elfliq - Green Grape Rose 🍇", inStock: true },
-            { id: 11, name: "Elfliq - Jasmine Raspberry 🌸", inStock: true },
-            { id: 12, name: "Elfliq - Kiwi Passion Fruit Guava 🥝", inStock: true },
-            { id: 13, name: "Elfliq - Pina Colada 🥥", inStock: true },
-            { id: 14, name: "Elfliq - Pink Lemonade 🍋", inStock: true },
-            { id: 15, name: "Elfliq - Strawberry Cherry Lemon 🍓", inStock: true }
+            {id: 1, name: "Elfliq - Apple Peach 🍎🍑"}, {id: 2, name: "Elfliq - Blackberry Lemon 🍇🍋"},
+            {id: 3, name: "Elfliq - Blue Razz Ice 🫐❄️"}, {id: 4, name: "Elfliq - Cherry Cola 🍒🥤"},
+            {id: 5, name: "Elfliq - Pink Lemonade 🍋💖"}, {id: 6, name: "Elfliq - Elfbull Ice ⚡🧊"},
+            {id: 7, name: "Elfliq - Kiwi Passion Fruit 🥝"}, {id: 8, name: "Elfliq - Pina Colada 🥥🍍"},
+            {id: 9, name: "Elfliq - Strawberry Cherry 🍓🍒"}, {id: 10, name: "Elfliq - Cherry Lemon Peach 🍑"},
+            {id: 11, name: "Elfliq - Elf Jack 🃏"}, {id: 12, name: "Elfliq - Green Grape Rose 🍇"},
+            {id: 13, name: "Elfliq - Jasmine Raspberry 🌸"}, {id: 14, name: "Elfliq - Blueberry Rose Mint 🌹"},
+            {id: 15, name: "Elfliq - Sour Blueberry Raspberry 💥"}
         ];
-
         let cart = [];
-        let currentFilter = 'all';
 
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
-            container.innerHTML = '';
-            const query = document.getElementById('search-input').value.toLowerCase();
-            
             products.forEach(p => {
-                if (p.name.toLowerCase().includes(query) && (currentFilter === 'all' || (currentFilter === 'instock' && p.inStock) || (currentFilter === 'outofstock' && !p.inStock))) {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <div class="product-img"></div>
-                        <div class="product-info">
-                            <h3 class="product-title">${p.name}</h3>
-                            <div class="price-row">
-                                <p class="price">180 MDL</p>
-                                <button class="btn" onclick="addToCart('${p.name}')">+</button>
-                            </div>
-                        </div>`;
-                    container.appendChild(card);
-                }
+                container.innerHTML += `
+                    <div class="product-card">
+                        <p style="font-size: 0.8em; height: 2.4em; overflow: hidden;">${p.name}</p>
+                        <p class="price">180 MDL</p>
+                        <button class="btn" onclick="addToCart('${p.name}')">+</button>
+                    </div>`;
             });
         }
-
-        function setFilter(f) { 
-            currentFilter = f; 
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-'+f).classList.add('active');
-            renderCatalog(); 
-        }
-
-        function addToCart(n) { cart.push(n); document.getElementById('nav-cart-count').innerText = cart.length; renderCart(); }
-        function removeFromCart(i) { cart.splice(i, 1); document.getElementById('nav-cart-count').innerText = cart.length; renderCart(); }
-        function scrollToCart() { document.getElementById('cart-anchor').scrollIntoView({ behavior: 'smooth' }); }
-
+        function addToCart(n) { cart.push(n); renderCart(); }
         function renderCart() {
-            const list = document.getElementById('cart-list');
-            list.innerHTML = '';
+            document.getElementById('cart-list').innerHTML = cart.map(i => `<div style="padding:4px;">• ${i}</div>`).join('');
             let total = cart.length * 180;
-            if (document.getElementById('delivery').value === "Доставка") total += 50;
-            
-            cart.forEach((item, i) => {
-                list.innerHTML += `<div class="cart-item"><span>${item}</span><button class="delete-btn" onclick="removeFromCart(${i})">❌</button></div>`;
-            });
+            if (document.getElementById('delivery').value.includes("Доставка")) total += 50;
             document.getElementById('cart-total').innerText = "Итого: " + total + " MDL";
         }
 
         function sendOrder() {
-            const contact = document.getElementById('contact').value;
+            const contact = document.getElementById('contact').value.trim();
             if (!contact) return alert("Введите контакты!");
-            const data = { contact, items: cart, total: document.getElementById('cart-total').innerText, delivery: document.getElementById('delivery').value };
-            tg.sendData(JSON.stringify(data));
+            
+            const orderData = {
+                items: cart.map(name => ({name: name + " - 180 MDL"})),
+                total_price: parseInt(document.getElementById('cart-total').innerText.replace(/\D/g, '')),
+                delivery: document.getElementById('delivery').value,
+                contact: contact
+            };
+            tg.sendData(JSON.stringify(orderData));
         }
-
         renderCatalog();
     </script>
 </body>
