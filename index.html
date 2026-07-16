@@ -9,10 +9,33 @@
         body { font-family: sans-serif; background: #131314; color: #fff; padding: 15px; margin: 0; }
         .header { text-align: center; padding: 15px 0; }
         .header h1 { color: #d4ff3b; font-size: 1.6em; margin: 0; }
-        .catalog { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .product-card { background: #1e1e1f; border-radius: 12px; padding: 10px; border: 1px solid #2e2e30; }
+        
+        /* Исправленная сетка: 2 колонки, карточки сжимаются корректно */
+        .catalog { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            margin-top: 15px; 
+        }
+        .product-card { 
+            background: #1e1e1f; 
+            border-radius: 12px; 
+            padding: 10px; 
+            border: 1px solid #2e2e30; 
+            display: flex; 
+            flex-direction: column; 
+            min-width: 0; /* Чтобы не разрывало верстку */
+        }
+        .product-title { 
+            font-size: 0.85em; 
+            height: 3em; 
+            overflow: hidden; 
+            margin: 0 0 5px 0; 
+            word-wrap: break-word;
+        }
         .price { color: #d4ff3b; font-weight: bold; margin: 5px 0; }
         .btn { background: #d4ff3b; color: #000; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; border: none; }
+        
         .cart-section { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; }
     </style>
@@ -24,7 +47,7 @@
         <h3>🛒 Корзина</h3>
         <div id="cart-list"></div>
         <p id="cart-total">Итого: 0 MDL</p>
-        <input type="text" id="contact" placeholder="Введите ваш контакт (Лсдм или номер)">
+        <input type="text" id="contact" placeholder="Ваш контакт (Лсдм или номер)">
         <select id="delivery" onchange="renderCart()">
             <option value="Самовывоз (Бельцы)">Самовывоз (Бельцы)</option>
             <option value="Доставка (+50 лей)">Доставка (+50 лей)</option>
@@ -35,30 +58,43 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+
         const products = [
-            {id: 1, name: "Elfliq - Apple Peach 🍎🍑"}, {id: 2, name: "Elfliq - Blackberry Lemon 🍇🍋"},
-            {id: 3, name: "Elfliq - Blue Razz Ice 🫐❄️"}, {id: 4, name: "Elfliq - Cherry Cola 🍒🥤"},
-            {id: 5, name: "Elfliq - Pink Lemonade 🍋💖"}, {id: 6, name: "Elfliq - Elfbull Ice ⚡🧊"},
-            {id: 7, name: "Elfliq - Kiwi Passion Fruit 🥝"}, {id: 8, name: "Elfliq - Pina Colada 🥥🍍"},
-            {id: 9, name: "Elfliq - Strawberry Cherry 🍓🍒"}, {id: 10, name: "Elfliq - Cherry Lemon Peach 🍑"},
-            {id: 11, name: "Elfliq - Elf Jack 🃏"}, {id: 12, name: "Elfliq - Green Grape Rose 🍇"},
-            {id: 13, name: "Elfliq - Jasmine Raspberry 🌸"}, {id: 14, name: "Elfliq - Blueberry Rose Mint 🌹"},
-            {id: 15, name: "Elfliq - Sour Blueberry Raspberry 💥"}
+            {id: 1, name: "Elfliq - Apple Peach 🍎🍑", inStock: true},
+            {id: 2, name: "Elfliq - Blackberry Lemon 🍇🍋", inStock: true},
+            {id: 3, name: "Elfliq - Blue Razz Ice 🫐❄️", inStock: true},
+            {id: 4, name: "Elfliq - Cherry Cola 🍒🥤", inStock: true},
+            {id: 5, name: "Elfliq - Pink Lemonade 🍋💖", inStock: true},
+            {id: 6, name: "Elfliq - Elfbull Ice ⚡🧊", inStock: true},
+            {id: 7, name: "Elfliq - Kiwi Passion Fruit 🥝", inStock: true},
+            {id: 8, name: "Elfliq - Pina Colada 🥥🍍", inStock: true},
+            {id: 9, name: "Elfliq - Strawberry Cherry 🍓🍒", inStock: true},
+            {id: 10, name: "Elfliq - Cherry Lemon Peach 🍑", inStock: true},
+            {id: 11, name: "Elfliq - Elf Jack 🃏", inStock: true},
+            {id: 12, name: "Elfliq - Green Grape Rose 🍇", inStock: true},
+            {id: 13, name: "Elfliq - Jasmine Raspberry 🌸", inStock: true},
+            {id: 14, name: "Elfliq - Blueberry Rose Mint 🌹", inStock: true},
+            {id: 15, name: "Elfliq - Sour Blueberry Raspberry 💥", inStock: true}
         ];
+        
         let cart = [];
 
         function renderCatalog() {
             const container = document.getElementById('catalog-container');
+            container.innerHTML = '';
             products.forEach(p => {
+                if (!p.inStock) return;
                 container.innerHTML += `
                     <div class="product-card">
-                        <p style="font-size: 0.8em; height: 2.4em; overflow: hidden;">${p.name}</p>
+                        <p class="product-title">${p.name}</p>
                         <p class="price">180 MDL</p>
                         <button class="btn" onclick="addToCart('${p.name}')">+</button>
                     </div>`;
             });
         }
+
         function addToCart(n) { cart.push(n); renderCart(); }
+        
         function renderCart() {
             document.getElementById('cart-list').innerHTML = cart.map(i => `<div style="padding:4px;">• ${i}</div>`).join('');
             let total = cart.length * 180;
@@ -78,6 +114,7 @@
             };
             tg.sendData(JSON.stringify(orderData));
         }
+
         renderCatalog();
     </script>
 </body>
