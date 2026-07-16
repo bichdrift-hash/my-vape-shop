@@ -8,18 +8,12 @@
     <style>
         :root { --bg: #0d0d0d; --card: #1a1a1c; --accent: #d4ff3b; --text: #ffffff; --gray: #8e8e93; }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 15px; margin: 0; padding-bottom: 80px; }
-        
-        /* Шапка и Приветствие */
         .header { text-align: center; margin-bottom: 20px; }
         .header h1 { margin: 0; font-size: 24px; letter-spacing: 1px; color: var(--text); }
         .header p { font-size: 14px; color: var(--gray); margin: 8px 0 15px 0; }
-        
-        /* Верхние кнопки */
         .top-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-top { flex: 1; background: var(--card); color: var(--text); text-decoration: none; text-align: center; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; border: 1px solid #2c2c2e; }
         .btn-top span { color: var(--accent); }
-        
-        /* Сетка товаров 2x2 */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .card { background: var(--card); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #2c2c2e; position: relative; }
         .card img { width: 100%; height: auto; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 10px; border-radius: 12px; background: #222; }
@@ -27,51 +21,34 @@
         .card p.desc { margin: 0 0 10px 0; font-size: 11px; color: var(--gray); }
         .card .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .card .price { color: var(--accent); font-weight: 800; font-size: 15px; }
-        .card .vol { color: var(--gray); font-size: 12px; }
         .btn-add { background: var(--accent); color: #000; padding: 10px; border-radius: 10px; font-weight: 700; border: none; width: 100%; cursor: pointer; font-size: 14px; }
-        
-        /* Корзина */
         .cart-section { margin-top: 30px; background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #2c2c2e; }
-        .cart-section h3 { margin: 0 0 15px 0; font-size: 18px; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #2c2c2e; font-size: 14px; }
-        .cart-item:last-child { border-bottom: none; }
-        
-        /* Форма заказа */
         .form-group { margin-top: 15px; }
         .form-group label { font-size: 12px; color: var(--gray); text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: bold; }
         input, select { width: 100%; padding: 14px; background: #222; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; font-size: 15px; margin-bottom: 10px; }
-        input:focus, select:focus { outline: 1px solid var(--accent); }
-        
-        /* Итого и кнопка заказа */
         .total-row { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; font-size: 18px; font-weight: bold; }
         .total-price { color: var(--accent); font-size: 22px; }
         .btn-order { background: var(--accent); color: #000; padding: 16px; border-radius: 14px; font-weight: 800; border: none; width: 100%; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="header">
         <h1>VapeDealer</h1>
         <p>Лучшие вкусы Elfliq. Выбирай и заказывай!</p>
     </div>
-
     <div class="top-buttons">
-        <a href="https://t.me/ТВОЙ_КАНАЛ_СЮДА" class="btn-top">📢 Канал</a>
+        <a href="https://t.me/+1-6I_77qvvtlZmM6" class="btn-top">📢 Канал</a>
         <a href="https://t.me/vape_dealermd" class="btn-top">👨‍💼 <span>Менеджер</span></a>
     </div>
-
     <div class="grid" id="catalog"></div>
-
     <div class="cart-section" id="cart-block">
         <h3>🛒 Оформление заказа</h3>
-        
         <div id="cart-items" style="margin-bottom: 20px;"></div>
-        
         <div class="form-group">
             <label>📱 Контакт для связи</label>
             <input type="text" id="contact" placeholder="+373 xx xx xx или @username">
         </div>
-
         <div class="form-group">
             <label>🚚 Способ получения</label>
             <select id="delivery">
@@ -79,24 +56,18 @@
                 <option value="Доставка Кишинев">Доставка (+50 MDL)</option>
             </select>
         </div>
-
         <div class="total-row">
             <span>Итого:</span>
             <span class="total-price" id="total">0 MDL</span>
         </div>
-
         <button class="btn-order" onclick="sendOrder()">Подтвердить заказ →</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
-        // Ссылка на корень твоего сайта (где лежат картинки)
         const BASE_URL = "https://bichdrift-hash.github.io/my-vape-shop/";
-
         const products = [
-            const products = [
             {id: 1, name: "Apple Peach", desc: "Свежее яблоко и персик", img: "apple_peach.jpg", inStock: true},
             {id: 2, name: "Blackberry Lemon", desc: "Ежевика с лимоном", img: "blackberry_lemon.jpg", inStock: true},
             {id: 3, name: "Blue Razz Ice", desc: "Черника и малина со льдом", img: "blue_razz_ice.jpg", inStock: true},
@@ -115,7 +86,6 @@
         ];
         
         let cart = {};
-
         function renderCatalog() {
             const cat = document.getElementById('catalog');
             cat.innerHTML = products.filter(p => p.inStock).map(p => `
@@ -124,20 +94,17 @@
                     <h4>${p.name}</h4>
                     <p class="desc">${p.desc}</p>
                     <div class="price-row">
-                        <span class="vol">30 ml</span>
                         <span class="price">180 MDL</span>
                     </div>
                     <button class="btn-add" onclick="addToCart('${p.name}')">В корзину</button>
                 </div>
             `).join('');
         }
-
         function addToCart(name) {
             cart[name] = (cart[name] || 0) + 1;
             tg.HapticFeedback.impactOccurred('light');
             updateCart();
         }
-
         function updateCart() {
             let totalItems = 0;
             let itemsHtml = '';
@@ -150,24 +117,21 @@
             let totalPrice = (totalItems * unitPrice) + (document.getElementById('delivery').value.includes("Доставка") ? 50 : 0);
             document.getElementById('total').innerText = totalPrice + " MDL";
         }
-
         document.getElementById('delivery').addEventListener('change', updateCart);
-
         function sendOrder() {
             const contact = document.getElementById('contact').value.trim();
             if (!contact) { tg.showAlert("Введите контакт!"); return; }
             if (Object.keys(cart).length === 0) { tg.showAlert("Корзина пуста!"); return; }
-
             const orderData = {
                 contact: contact,
                 delivery: document.getElementById('delivery').value,
                 items: cart,
                 total: document.getElementById('total').innerText
             };
-            
             tg.sendData(JSON.stringify(orderData));
-            tg.close(); // Обязательно закрывает окно после нажатия
+            tg.close();
         }
+        renderCatalog();
     </script>
 </body>
 </html>
