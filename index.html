@@ -155,8 +155,8 @@
 
         function sendOrder() {
             const contact = document.getElementById('contact').value.trim();
-            if (!contact) { return tg.showAlert("Введите контакт для связи!"); }
-            if (Object.keys(cart).length === 0) { return tg.showAlert("Корзина пуста!"); }
+            if (!contact) { tg.showAlert("Введите контакт!"); return; }
+            if (Object.keys(cart).length === 0) { tg.showAlert("Корзина пуста!"); return; }
 
             const orderData = {
                 contact: contact,
@@ -166,10 +166,8 @@
             };
             
             tg.sendData(JSON.stringify(orderData));
-            tg.close();
+            tg.close(); // Обязательно закрывает окно после нажатия
         }
-
-        renderCatalog();
     </script>
 </body>
 </html>
