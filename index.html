@@ -92,7 +92,9 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // Твои 15 вкусов. Укажи правильные названия картинок (например: apple_peach.jpg), если они у тебя лежат в GitHub
+        // Ссылка на корень твоего сайта (где лежат картинки)
+        const BASE_URL = "https://bichdrift-hash.github.io/my-vape-shop/";
+
         const products = [
             {id: 1, name: "Elfliq Apple Peach", desc: "Свежее яблоко и персик", img: "apple_peach.jpg", inStock: true},
             {id: 2, name: "Elfliq Blackberry Lemon", desc: "Ежевика с лимоном", img: "blackberry_lemon.jpg", inStock: true},
@@ -111,13 +113,13 @@
             {id: 15, name: "Elfliq Sour Blueberry Raspberry", desc: "Кислая черника-малина", img: "sour_blue_rasp.jpg", inStock: true}
         ];
         
-        let cart = {}; // Храним корзину в виде { "Имя": количество }
+        let cart = {};
 
         function renderCatalog() {
             const cat = document.getElementById('catalog');
             cat.innerHTML = products.filter(p => p.inStock).map(p => `
                 <div class="card">
-                    <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150/222222/d4ff3b?text=VapeDealer'">
+                    <img src="${BASE_URL}${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150/222222/d4ff3b?text=Vape'">
                     <h4>${p.name}</h4>
                     <p class="desc">${p.desc}</p>
                     <div class="price-row">
@@ -130,8 +132,7 @@
         }
 
         function addToCart(name) {
-            if (cart[name]) { cart[name]++; } 
-            else { cart[name] = 1; }
+            cart[name] = (cart[name] || 0) + 1;
             tg.HapticFeedback.impactOccurred('light');
             updateCart();
         }
@@ -139,27 +140,13 @@
         function updateCart() {
             let totalItems = 0;
             let itemsHtml = '';
-            
             for (let name in cart) {
                 totalItems += cart[name];
-                itemsHtml += `
-                    <div class="cart-item">
-                        <span>• ${name}</span>
-                        <span style="color:var(--accent); font-weight:bold;">x${cart[name]}</span>
-                    </div>`;
+                itemsHtml += `<div class="cart-item"><span>• ${name}</span><span style="color:var(--accent)">x${cart[name]}</span></div>`;
             }
-            
             document.getElementById('cart-items').innerHTML = itemsHtml || '<p style="color:#888; font-size:14px;">Корзина пуста</p>';
-            
-            // Логика скидки: 1 шт = 180, от 2 шт = 170
             let unitPrice = totalItems >= 2 ? 170 : 180;
-            let totalPrice = totalItems * unitPrice;
-            
-            // Доставка
-            if (document.getElementById('delivery').value.includes("Доставка")) {
-                totalPrice += 50;
-            }
-            
+            let totalPrice = (totalItems * unitPrice) + (document.getElementById('delivery').value.includes("Доставка") ? 50 : 0);
             document.getElementById('total').innerText = totalPrice + " MDL";
         }
 
@@ -167,38 +154,21 @@
 
         function sendOrder() {
             const contact = document.getElementById('contact').value.trim();
-            if (!contact) {
-                tg.showAlert("Пожалуйста, введите контакт для связи!");
-                return;
-            }
-            if (Object.keys(cart).length === 0) {
-                tg.showAlert("Ваша корзина пуста!");
-                return;
-            }
-
-            // Формируем красивый список для бота
-            let itemsList = [];
-            let totalItems = 0;
-            for (let name in cart) {
-                itemsList.push(`• ${name} (x${cart[name]})`);
-                totalItems += cart[name];
-            }
-            
-            let unitPrice = totalItems >= 2 ? 170 : 180;
+            if (!contact) { return tg.showAlert("Введите контакт для связи!"); }
+            if (Object.keys(cart).length === 0) { return tg.showAlert("Корзина пуста!"); }
 
             const orderData = {
                 contact: contact,
                 delivery: document.getElementById('delivery').value,
-                items_list: itemsList.join("\\n"),
-                total: document.getElementById('total').innerText.replace(' MDL', ''),
-                price_per_item: unitPrice
+                items: cart,
+                total: document.getElementById('total').innerText
             };
             
             tg.sendData(JSON.stringify(orderData));
+            tg.close();
         }
 
         renderCatalog();
-        updateCart();
     </script>
 </body>
 </html>
