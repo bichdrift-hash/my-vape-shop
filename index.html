@@ -2,120 +2,203 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VapeDealer Shop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #131314; color: #fff; padding: 15px; margin: 0; }
-        .header { text-align: center; padding: 15px 0; }
-        .header h1 { color: #d4ff3b; font-size: 1.6em; margin: 0; }
+        :root { --bg: #0d0d0d; --card: #1a1a1c; --accent: #d4ff3b; --text: #ffffff; --gray: #8e8e93; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 15px; margin: 0; padding-bottom: 80px; }
         
-        /* Исправленная сетка: 2 колонки, карточки сжимаются корректно */
-        .catalog { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; 
-            margin-top: 15px; 
-        }
-        .product-card { 
-            background: #1e1e1f; 
-            border-radius: 12px; 
-            padding: 10px; 
-            border: 1px solid #2e2e30; 
-            display: flex; 
-            flex-direction: column; 
-            min-width: 0; /* Чтобы не разрывало верстку */
-        }
-        .product-title { 
-            font-size: 0.85em; 
-            height: 3em; 
-            overflow: hidden; 
-            margin: 0 0 5px 0; 
-            word-wrap: break-word;
-        }
-        .price { color: #d4ff3b; font-weight: bold; margin: 5px 0; }
-        .btn { background: #d4ff3b; color: #000; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; border: none; }
+        /* Шапка и Приветствие */
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; letter-spacing: 1px; color: var(--text); }
+        .header p { font-size: 14px; color: var(--gray); margin: 8px 0 15px 0; }
         
-        .cart-section { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #222; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; }
+        /* Верхние кнопки */
+        .top-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-top { flex: 1; background: var(--card); color: var(--text); text-decoration: none; text-align: center; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; border: 1px solid #2c2c2e; }
+        .btn-top span { color: var(--accent); }
+        
+        /* Сетка товаров 2x2 */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .card { background: var(--card); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #2c2c2e; position: relative; }
+        .card img { width: 100%; height: auto; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 10px; border-radius: 12px; background: #222; }
+        .card h4 { margin: 0 0 4px 0; font-size: 14px; line-height: 1.2; word-wrap: break-word; }
+        .card p.desc { margin: 0 0 10px 0; font-size: 11px; color: var(--gray); }
+        .card .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card .price { color: var(--accent); font-weight: 800; font-size: 15px; }
+        .card .vol { color: var(--gray); font-size: 12px; }
+        .btn-add { background: var(--accent); color: #000; padding: 10px; border-radius: 10px; font-weight: 700; border: none; width: 100%; cursor: pointer; font-size: 14px; }
+        
+        /* Корзина */
+        .cart-section { margin-top: 30px; background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #2c2c2e; }
+        .cart-section h3 { margin: 0 0 15px 0; font-size: 18px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #2c2c2e; font-size: 14px; }
+        .cart-item:last-child { border-bottom: none; }
+        
+        /* Форма заказа */
+        .form-group { margin-top: 15px; }
+        .form-group label { font-size: 12px; color: var(--gray); text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: bold; }
+        input, select { width: 100%; padding: 14px; background: #222; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; font-size: 15px; margin-bottom: 10px; }
+        input:focus, select:focus { outline: 1px solid var(--accent); }
+        
+        /* Итого и кнопка заказа */
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; font-size: 18px; font-weight: bold; }
+        .total-price { color: var(--accent); font-size: 22px; }
+        .btn-order { background: var(--accent); color: #000; padding: 16px; border-radius: 14px; font-weight: 800; border: none; width: 100%; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>VapeDealer</h1></div>
-    <div class="catalog" id="catalog-container"></div>
-    <div class="cart-section">
-        <h3>🛒 Корзина</h3>
-        <div id="cart-list"></div>
-        <p id="cart-total">Итого: 0 MDL</p>
-        <input type="text" id="contact" placeholder="Ваш контакт (Лсдм или номер)">
-        <select id="delivery" onchange="renderCart()">
-            <option value="Самовывоз (Бельцы)">Самовывоз (Бельцы)</option>
-            <option value="Доставка (+50 лей)">Доставка (+50 лей)</option>
-        </select>
-        <button class="btn" onclick="sendOrder()">Оформить заказ</button>
+
+    <div class="header">
+        <h1>VapeDealer</h1>
+        <p>Лучшие вкусы Elfliq. Выбирай и заказывай!</p>
+    </div>
+
+    <div class="top-buttons">
+        <a href="https://t.me/ТВОЙ_КАНАЛ_СЮДА" class="btn-top">📢 Канал</a>
+        <a href="https://t.me/vape_dealermd" class="btn-top">👨‍💼 <span>Менеджер</span></a>
+    </div>
+
+    <div class="grid" id="catalog"></div>
+
+    <div class="cart-section" id="cart-block">
+        <h3>🛒 Оформление заказа</h3>
+        
+        <div id="cart-items" style="margin-bottom: 20px;"></div>
+        
+        <div class="form-group">
+            <label>📱 Контакт для связи</label>
+            <input type="text" id="contact" placeholder="+373 xx xx xx или @username">
+        </div>
+
+        <div class="form-group">
+            <label>🚚 Способ получения</label>
+            <select id="delivery">
+                <option value="Самовывоз (Бельцы)">Самовывоз Бельцы (Бесплатно)</option>
+                <option value="Доставка Кишинев">Доставка (+50 MDL)</option>
+            </select>
+        </div>
+
+        <div class="total-row">
+            <span>Итого:</span>
+            <span class="total-price" id="total">0 MDL</span>
+        </div>
+
+        <button class="btn-order" onclick="sendOrder()">Подтвердить заказ →</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-
+        
+        // Твои 15 вкусов. Укажи правильные названия картинок (например: apple_peach.jpg), если они у тебя лежат в GitHub
         const products = [
-            {id: 1, name: "Elfliq - Apple Peach 🍎🍑", inStock: true},
-            {id: 2, name: "Elfliq - Blackberry Lemon 🍇🍋", inStock: true},
-            {id: 3, name: "Elfliq - Blue Razz Ice 🫐❄️", inStock: true},
-            {id: 4, name: "Elfliq - Cherry Cola 🍒🥤", inStock: true},
-            {id: 5, name: "Elfliq - Pink Lemonade 🍋💖", inStock: true},
-            {id: 6, name: "Elfliq - Elfbull Ice ⚡🧊", inStock: true},
-            {id: 7, name: "Elfliq - Kiwi Passion Fruit 🥝", inStock: true},
-            {id: 8, name: "Elfliq - Pina Colada 🥥🍍", inStock: true},
-            {id: 9, name: "Elfliq - Strawberry Cherry 🍓🍒", inStock: true},
-            {id: 10, name: "Elfliq - Cherry Lemon Peach 🍑", inStock: true},
-            {id: 11, name: "Elfliq - Elf Jack 🃏", inStock: true},
-            {id: 12, name: "Elfliq - Green Grape Rose 🍇", inStock: true},
-            {id: 13, name: "Elfliq - Jasmine Raspberry 🌸", inStock: true},
-            {id: 14, name: "Elfliq - Blueberry Rose Mint 🌹", inStock: true},
-            {id: 15, name: "Elfliq - Sour Blueberry Raspberry 💥", inStock: true}
+            {id: 1, name: "Elfliq Apple Peach", desc: "Свежее яблоко и персик", img: "apple_peach.jpg", inStock: true},
+            {id: 2, name: "Elfliq Blackberry Lemon", desc: "Ежевика с лимоном", img: "blackberry_lemon.jpg", inStock: true},
+            {id: 3, name: "Elfliq Blue Razz Ice", desc: "Черника и малина со льдом", img: "blue_razz.jpg", inStock: true},
+            {id: 4, name: "Elfliq Cherry Cola", desc: "Вишневая кола", img: "cherry_cola.jpg", inStock: true},
+            {id: 5, name: "Elfliq Pink Lemonade", desc: "Розовый лимонад", img: "pink_lemonade.jpg", inStock: true},
+            {id: 6, name: "Elfliq Elfbull Ice", desc: "Энергетик со льдом", img: "elfbull.jpg", inStock: true},
+            {id: 7, name: "Elfliq Kiwi Passion Fruit", desc: "Киви и маракуйя", img: "kiwi_passion.jpg", inStock: true},
+            {id: 8, name: "Elfliq Pina Colada", desc: "Пинья колада", img: "pina_colada.jpg", inStock: true},
+            {id: 9, name: "Elfliq Strawberry Cherry", desc: "Клубника и вишня", img: "strawberry_cherry.jpg", inStock: true},
+            {id: 10, name: "Elfliq Cherry Lemon Peach", desc: "Вишня, лимон, персик", img: "cherry_lemon_peach.jpg", inStock: true},
+            {id: 11, name: "Elfliq Elf Jack", desc: "Фирменный микс", img: "elf_jack.jpg", inStock: true},
+            {id: 12, name: "Elfliq Green Grape Rose", desc: "Зеленый виноград и роза", img: "green_grape.jpg", inStock: true},
+            {id: 13, name: "Elfliq Jasmine Raspberry", desc: "Жасмин и малина", img: "jasmine_rasp.jpg", inStock: true},
+            {id: 14, name: "Elfliq Blueberry Rose Mint", desc: "Черника, роза, мята", img: "blue_rose_mint.jpg", inStock: true},
+            {id: 15, name: "Elfliq Sour Blueberry Raspberry", desc: "Кислая черника-малина", img: "sour_blue_rasp.jpg", inStock: true}
         ];
         
-        let cart = [];
+        let cart = {}; // Храним корзину в виде { "Имя": количество }
 
         function renderCatalog() {
-            const container = document.getElementById('catalog-container');
-            container.innerHTML = '';
-            products.forEach(p => {
-                if (!p.inStock) return;
-                container.innerHTML += `
-                    <div class="product-card">
-                        <p class="product-title">${p.name}</p>
-                        <p class="price">180 MDL</p>
-                        <button class="btn" onclick="addToCart('${p.name}')">+</button>
-                    </div>`;
-            });
+            const cat = document.getElementById('catalog');
+            cat.innerHTML = products.filter(p => p.inStock).map(p => `
+                <div class="card">
+                    <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150/222222/d4ff3b?text=VapeDealer'">
+                    <h4>${p.name}</h4>
+                    <p class="desc">${p.desc}</p>
+                    <div class="price-row">
+                        <span class="vol">30 ml</span>
+                        <span class="price">180 MDL</span>
+                    </div>
+                    <button class="btn-add" onclick="addToCart('${p.name}')">В корзину</button>
+                </div>
+            `).join('');
         }
 
-        function addToCart(n) { cart.push(n); renderCart(); }
-        
-        function renderCart() {
-            document.getElementById('cart-list').innerHTML = cart.map(i => `<div style="padding:4px;">• ${i}</div>`).join('');
-            let total = cart.length * 180;
-            if (document.getElementById('delivery').value.includes("Доставка")) total += 50;
-            document.getElementById('cart-total').innerText = "Итого: " + total + " MDL";
+        function addToCart(name) {
+            if (cart[name]) { cart[name]++; } 
+            else { cart[name] = 1; }
+            tg.HapticFeedback.impactOccurred('light');
+            updateCart();
         }
+
+        function updateCart() {
+            let totalItems = 0;
+            let itemsHtml = '';
+            
+            for (let name in cart) {
+                totalItems += cart[name];
+                itemsHtml += `
+                    <div class="cart-item">
+                        <span>• ${name}</span>
+                        <span style="color:var(--accent); font-weight:bold;">x${cart[name]}</span>
+                    </div>`;
+            }
+            
+            document.getElementById('cart-items').innerHTML = itemsHtml || '<p style="color:#888; font-size:14px;">Корзина пуста</p>';
+            
+            // Логика скидки: 1 шт = 180, от 2 шт = 170
+            let unitPrice = totalItems >= 2 ? 170 : 180;
+            let totalPrice = totalItems * unitPrice;
+            
+            // Доставка
+            if (document.getElementById('delivery').value.includes("Доставка")) {
+                totalPrice += 50;
+            }
+            
+            document.getElementById('total').innerText = totalPrice + " MDL";
+        }
+
+        document.getElementById('delivery').addEventListener('change', updateCart);
 
         function sendOrder() {
             const contact = document.getElementById('contact').value.trim();
-            if (!contact) return alert("Введите контакты!");
+            if (!contact) {
+                tg.showAlert("Пожалуйста, введите контакт для связи!");
+                return;
+            }
+            if (Object.keys(cart).length === 0) {
+                tg.showAlert("Ваша корзина пуста!");
+                return;
+            }
+
+            // Формируем красивый список для бота
+            let itemsList = [];
+            let totalItems = 0;
+            for (let name in cart) {
+                itemsList.push(`• ${name} (x${cart[name]})`);
+                totalItems += cart[name];
+            }
             
+            let unitPrice = totalItems >= 2 ? 170 : 180;
+
             const orderData = {
-                items: cart.map(name => ({name: name + " - 180 MDL"})),
-                total_price: parseInt(document.getElementById('cart-total').innerText.replace(/\D/g, '')),
+                contact: contact,
                 delivery: document.getElementById('delivery').value,
-                contact: contact
+                items_list: itemsList.join("\\n"),
+                total: document.getElementById('total').innerText.replace(' MDL', ''),
+                price_per_item: unitPrice
             };
+            
             tg.sendData(JSON.stringify(orderData));
         }
 
         renderCatalog();
+        updateCart();
     </script>
 </body>
 </html>
